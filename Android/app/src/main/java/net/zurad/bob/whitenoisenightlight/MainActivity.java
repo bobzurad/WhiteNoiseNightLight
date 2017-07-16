@@ -23,6 +23,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 String hex = Integer.toHexString(progress);
+                if (hex.length() == 1) {
+                    hex = "0" + hex;
+                }
                 _mainLayout.setBackgroundColor(Color.parseColor("#" + hex + hex + hex));
             }
             @Override
