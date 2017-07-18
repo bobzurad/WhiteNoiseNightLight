@@ -3,5 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="black">#000000</color>
+    <color name="startingBackgroundColor">#808080</color>
+    <color name="babyBlue">#89cff0</color>
+    <color name="babyPink">#f089cf</color>
+    <color name="babyGreen">#cff089</color>
+    <color name="babyOrange">#f0aa89</color>
 </resources>

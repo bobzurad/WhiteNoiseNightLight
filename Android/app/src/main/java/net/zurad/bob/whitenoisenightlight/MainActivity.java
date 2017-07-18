@@ -1,14 +1,14 @@
 package net.zurad.bob.whitenoisenightlight;
 
 import android.graphics.Color;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 public class MainActivity extends AppCompatActivity {
 
-    ConstraintLayout _mainLayout;
+    LinearLayout _mainLayout;
     SeekBar _seekBar;
 
     @Override
@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _mainLayout = (ConstraintLayout) findViewById(R.id.mainLayout);
+        _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
 
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
         _seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
