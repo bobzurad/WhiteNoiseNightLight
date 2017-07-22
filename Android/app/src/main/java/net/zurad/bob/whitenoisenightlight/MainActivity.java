@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
             }
         } else {
-            setBrightness(R.integer.startingBrightness);
+            setBrightness(getResources().getInteger(R.integer.startingBrightness));
         }
 
         //logic to handle seekbar
@@ -77,12 +78,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        //keep screen on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //allow screen to turn off
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
                 && requestCode == CODE_WRITE_SETTINGS_PERMISSION && Settings.System.canWrite(this)){
             _canChangeScreenBrightness = true;
-            setBrightness(R.integer.startingBrightness);
+            setBrightness(getResources().getInteger(R.integer.startingBrightness));
         }
     }
 
@@ -99,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
         //constrain the value of brightness
         if(brightness < 0)
             brightness = 0;
-        else if(brightness > R.integer.brightnessMax)
-            brightness = R.integer.brightnessMax;
+        else if(brightness > getResources().getInteger(R.integer.brightnessMax))
+            brightness = getResources().getInteger(R.integer.brightnessMax);
 
         try {
             //make sure brightness is set to manual mode
