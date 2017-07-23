@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout _mainLayout;
     SeekBar _seekBar;
     boolean _canChangeScreenBrightness;
+    int _brightnessOnAppStart;
+    int _brightnessModeOnAppStart;
 
     final int CODE_WRITE_SETTINGS_PERMISSION = 1001;
 
@@ -31,6 +33,14 @@ public class MainActivity extends AppCompatActivity {
 
         _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
+
+        //save starting brightness values
+        try {
+            _brightnessOnAppStart = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+            _brightnessModeOnAppStart = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
+        } catch (Settings.SettingNotFoundException ex) {
+            Log.e("Error", ex.getMessage());
+        }
 
         //check permissions to change screen brightness
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -53,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
             }
         } else {
-            setBrightness(getResources().getInteger(R.integer.startingBrightness));
+            setBrightness(_seekBar.getProgress());
+            Log.i("SeekBar value", Integer.toString(_seekBar.getProgress()));
         }
 
         //logic to handle seekbar
@@ -94,12 +105,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (_canChangeScreenBrightness) {
+            //put brightness and mode values back to what they were when the app started
+            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, _brightnessOnAppStart);
+            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, _brightnessModeOnAppStart);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
                 && requestCode == CODE_WRITE_SETTINGS_PERMISSION && Settings.System.canWrite(this)){
             _canChangeScreenBrightness = true;
-            setBrightness(getResources().getInteger(R.integer.startingBrightness));
+            setBrightness(getResources().getInteger(R.integer.defaultBrightness));
         }
     }
 
