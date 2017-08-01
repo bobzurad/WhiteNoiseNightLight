@@ -10,15 +10,13 @@
     android:background="@color/startingBackgroundColor"
     tools:context="net.zurad.bob.whitenoisenightlight.MainActivity">
 
-    <!--
-    <SeekBar
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:max="@integer/brightnessMax"
-        android:progress="@integer/defaultBrightness" />
-    -->
-
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:text="Brightness" />
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
@@ -28,7 +26,31 @@
         android:progressDrawable="@drawable/seekbar_style"
         android:thumb="@drawable/custom_thumb"
         android:splitTrack="false"
-        android:layout_marginTop="50dp"
         android:layout_gravity="center_vertical"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="White Noise" />
+        <!-- this View pushes the Switch to the right -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end" />
+    </LinearLayout>
 
 </LinearLayout>
