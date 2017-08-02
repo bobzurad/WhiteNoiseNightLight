@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -12,8 +13,10 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     SeekBar _seekBar;
     Switch _whiteNoiseSwitch;
     SoundPool _soundPool;
+    ActionBar _bar;
     int _soundId;
     int _playId;
 
@@ -42,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        _bar = getSupportActionBar();
         _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
         _whiteNoiseSwitch = (Switch) findViewById(R.id.whiteNoiseSwitch);
         _soundPool = createSoundPool();
         _soundId = _soundPool.load(this, R.raw.whitenoise, 1);
         _soundPool.setLoop(_soundId, -1);
+        _bar.setTitle(Html.fromHtml("<font color='#000000'>White Noise Night Light</font>"));
 
         //save starting brightness values
         try {
@@ -85,10 +91,21 @@ public class MainActivity extends AppCompatActivity {
         _seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //build hex color
                 String hex = Integer.toHexString(progress);
                 if (hex.length() == 1) {
                     hex = "0" + hex;
                 }
+                //change color of ActionBar
+                if (_bar != null) {
+                    _bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#" + hex + hex + hex)));
+                    if (progress < 64) {
+                        _bar.setTitle(Html.fromHtml("<font color='#C0C0C0'>White Noise Night Light</font>"));
+                    } else {
+                        _bar.setTitle(Html.fromHtml("<font color='#000000'>White Noise Night Light</font>"));
+                    }
+                }
+                //change color of background
                 _mainLayout.setBackgroundColor(Color.parseColor("#" + hex + hex + hex));
 
                 if (_canChangeScreenBrightness) {
