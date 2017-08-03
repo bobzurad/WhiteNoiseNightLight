@@ -11,7 +11,6 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -84,10 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
-            } else {
-                //TODO: WRITE_SETTINGS does not work with requestPermissions
-                //TODO: figure out which permissions this works for
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_SETTINGS}, CODE_WRITE_SETTINGS_PERMISSION);
             }
         } else {
             setBrightness(_seekBar.getProgress());
@@ -132,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //logic for white noise switch (TODO: stop white noise when activity loses focus)
+        //logic for white noise switch
         _whiteNoiseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
@@ -187,15 +182,6 @@ public class MainActivity extends AppCompatActivity {
                 && requestCode == CODE_WRITE_SETTINGS_PERMISSION && Settings.System.canWrite(this)) {
             _canChangeScreenBrightness = true;
             setBrightness(getResources().getInteger(R.integer.defaultBrightness));
-        }
-    }
-
-    //TODO: this method will never get called for WRITE_SETTINGS
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CODE_WRITE_SETTINGS_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            _canChangeScreenBrightness = true;
         }
     }
 
