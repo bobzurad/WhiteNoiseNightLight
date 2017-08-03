@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
@@ -24,12 +25,15 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.media.SoundPool;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     LinearLayout _mainLayout;
     SeekBar _seekBar;
     Switch _whiteNoiseSwitch;
+    TextView _brightnessTextView;
+    TextView _whiteNoiseTextView;
     SoundPool _soundPool;
     ActionBar _bar;
     int _soundId;
@@ -50,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
         _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
         _whiteNoiseSwitch = (Switch) findViewById(R.id.whiteNoiseSwitch);
+        _brightnessTextView = (TextView) findViewById(R.id.brightnessTextView);
+        _whiteNoiseTextView = (TextView) findViewById(R.id.whiteNoiseTextView);
         _soundPool = createSoundPool();
         _soundId = _soundPool.load(this, R.raw.whitenoise, 1);
         _soundPool.setLoop(_soundId, -1);
-        _bar.setTitle(Html.fromHtml("<font color='#000000'>White Noise Night Light</font>"));
+        _bar.setTitle(fromHtml("<font color='#000000'>White Noise Night Light</font>"));
 
         //save starting brightness values
         try {
@@ -99,10 +105,14 @@ public class MainActivity extends AppCompatActivity {
                 //change color of ActionBar
                 if (_bar != null) {
                     _bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#" + hex + hex + hex)));
-                    if (progress < 64) {
-                        _bar.setTitle(Html.fromHtml("<font color='#C0C0C0'>White Noise Night Light</font>"));
+                    if (progress < 80) {
+                        _bar.setTitle(fromHtml("<font color='#C0C0C0'>White Noise Night Light</font>"));
+                        _brightnessTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
+                        _whiteNoiseTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                     } else {
-                        _bar.setTitle(Html.fromHtml("<font color='#000000'>White Noise Night Light</font>"));
+                        _bar.setTitle(fromHtml("<font color='#000000'>White Noise Night Light</font>"));
+                        _brightnessTextView.setTextColor(Color.BLACK);
+                        _whiteNoiseTextView.setTextColor(Color.BLACK);
                     }
                 }
                 //change color of background
@@ -122,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //logic for white noise switch
+        //logic for white noise switch (TODO: stop white noise when activity loses focus)
         _whiteNoiseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
@@ -130,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                     if (_playId > 0) {
                         _soundPool.resume(_playId);
                     } else {
-                        _playId = _soundPool.play(_soundId, 1.0f, 1.0f, 1, -1, 1.0f);
+                        _playId = _soundPool.play(_soundId, 0.5f, 0.5f, 1, -1, 1.0f);
                     }
                 } else {
                     _soundPool.pause(_playId);
@@ -231,5 +241,16 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     protected SoundPool createOldSoundPool() {
         return new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+    }
+
+    @SuppressWarnings("deprecation")
+    private Spanned fromHtml(String html){
+        Spanned result;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            result = Html.fromHtml(html,Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            result = Html.fromHtml(html);
+        }
+        return result;
     }
 }

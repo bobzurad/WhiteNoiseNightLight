@@ -11,11 +11,13 @@
     tools:context="net.zurad.bob.whitenoisenightlight.MainActivity">
 
     <TextView
+        android:id="@+id/brightnessTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp"
+        android:textColor="@android:color/black"
         android:text="Brightness" />
     <SeekBar
         android:id="@+id/seekBar"
@@ -38,9 +40,11 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp">
         <TextView
+            android:id="@+id/whiteNoiseTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:textColor="@android:color/black"
             android:text="White Noise" />
         <!-- this View pushes the Switch to the right -->
         <View
