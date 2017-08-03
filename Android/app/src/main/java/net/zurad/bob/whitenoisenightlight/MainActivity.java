@@ -155,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
 
         //keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        if (_canChangeScreenBrightness) {
+            setBrightness(_seekBar.getProgress());
+        }
     }
 
     @Override
