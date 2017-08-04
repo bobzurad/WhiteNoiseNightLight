@@ -21,6 +21,7 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -32,6 +33,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
     LinearLayout _mainLayout;
+    LinearLayout _flashlightLayout;
     SeekBar _seekBar;
     Switch _whiteNoiseSwitch;
     Switch _flashlightSwitch;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         _bar = getSupportActionBar();
         _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
+        _flashlightLayout = (LinearLayout) findViewById(R.id.flashlightLayout);
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
         _whiteNoiseSwitch = (Switch) findViewById(R.id.whiteNoiseSwitch);
         _flashlightSwitch = (Switch) findViewById(R.id.flashlightSwitch);
@@ -73,13 +76,19 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         //for camera flash
         _hasFlashlight = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-        _surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-        _surfaceHolder = _surfaceView.getHolder();
-        _surfaceHolder.addCallback(this);
-        _camera = Camera.open();
-        try {
-            _camera.setPreviewDisplay(_surfaceHolder);
-        } catch (java.io.IOException ex) {}
+        if (_hasFlashlight) {
+            _flashlightLayout.setVisibility(View.VISIBLE);
+
+            _surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+            _surfaceHolder = _surfaceView.getHolder();
+            _surfaceHolder.addCallback(this);
+            _camera = Camera.open();
+            try {
+                _camera.setPreviewDisplay(_surfaceHolder);
+            } catch (java.io.IOException ex) {
+                Log.e("onCreate", ex.getMessage());
+            }
+        }
 
         //save starting brightness values
         try {
@@ -170,17 +179,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         _flashlightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isOn) {
-                if (isOn) {
-                    Camera.Parameters params = _camera.getParameters();
-                    params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                    _camera.setParameters(params);
-                    _camera.startPreview();
-                } else {
-                    Camera.Parameters params = _camera.getParameters();
-                    params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                    _camera.setParameters(params);
-                    _camera.stopPreview();
-                    _camera.release();
+                if (_hasFlashlight) {
+                    if (isOn) {
+                        Camera.Parameters params = _camera.getParameters();
+                        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                        _camera.setParameters(params);
+                        _camera.startPreview();
+                    } else {
+                        Camera.Parameters params = _camera.getParameters();
+                        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                        _camera.setParameters(params);
+                        _camera.stopPreview();
+                    }
                 }
             }
         });
@@ -286,18 +296,26 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return result;
     }
 
-    //region SurfaceHolder.Callback implementation
+    //region SurfaceHolder.Callback implementation (for flashlight on Android < 6)
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
     public void surfaceCreated(SurfaceHolder holder) {
-        _surfaceHolder = holder;
-        try {
-            _camera.setPreviewDisplay(_surfaceHolder);
-        } catch (java.io.IOException e) {}
+        if (_hasFlashlight) {
+            _surfaceHolder = holder;
+
+            try {
+                _camera.setPreviewDisplay(_surfaceHolder);
+            } catch (java.io.IOException ex) {
+                Log.e("surfaceCreated", ex.getMessage());
+            }
+        }
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-        _camera.stopPreview();
+        if (_hasFlashlight) {
+            _camera.stopPreview();
+        }
+
         _surfaceHolder = null;
     }
     //endregion
