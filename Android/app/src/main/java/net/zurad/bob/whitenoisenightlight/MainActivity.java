@@ -2,11 +2,14 @@ package net.zurad.bob.whitenoisenightlight;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -44,7 +47,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     ActionBar _bar;
     SurfaceView _surfaceView;
     SurfaceHolder _surfaceHolder;
+
+    //Camera for Android versions less than 6
     Camera _camera;
+
+    //Camera for Android 6 and up
+    CameraManager _cameraManager;
+    String _cameraId;
+
 
     int _soundId;
     int _playId;
@@ -79,14 +89,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (_hasFlashlight) {
             _flashlightLayout.setVisibility(View.VISIBLE);
 
-            _surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-            _surfaceHolder = _surfaceView.getHolder();
-            _surfaceHolder.addCallback(this);
-            _camera = Camera.open();
-            try {
-                _camera.setPreviewDisplay(_surfaceHolder);
-            } catch (java.io.IOException ex) {
-                Log.e("onCreate", ex.getMessage());
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                _surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+                _surfaceHolder = _surfaceView.getHolder();
+                _surfaceHolder.addCallback(this);
+                _camera = Camera.open();
+                try {
+                    _camera.setPreviewDisplay(_surfaceHolder);
+                } catch (java.io.IOException ex) {
+                    Log.e("onCreate", ex.getMessage());
+                }
             }
         }
 
@@ -180,16 +192,34 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isOn) {
                 if (_hasFlashlight) {
-                    if (isOn) {
-                        Camera.Parameters params = _camera.getParameters();
-                        params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                        _camera.setParameters(params);
-                        _camera.startPreview();
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        //for Android versions less than 6
+                        if (isOn) {
+                            Camera.Parameters params = _camera.getParameters();
+                            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                            _camera.setParameters(params);
+                            _camera.startPreview();
+                        } else {
+                            Camera.Parameters params = _camera.getParameters();
+                            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                            _camera.setParameters(params);
+                            _camera.stopPreview();
+                        }
                     } else {
-                        Camera.Parameters params = _camera.getParameters();
-                        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                        _camera.setParameters(params);
-                        _camera.stopPreview();
+                        //for Android 6 and up
+                        if (isOn) {
+                            try {
+                                _cameraManager.setTorchMode(_cameraId, true);   //Turn ON
+                            } catch (CameraAccessException e) {
+                                Log.e("flashlight switch", e.getMessage());
+                            }
+                        } else {
+                            try {
+                                _cameraManager.setTorchMode(_cameraId, false);
+                            } catch (CameraAccessException e) {
+                                Log.e("flashlight switch", e.getMessage());
+                            }
+                        }
                     }
                 }
             }
@@ -205,6 +235,15 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         if (_canChangeScreenBrightness) {
             setBrightness(_seekBar.getProgress());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            _cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+            try {
+                _cameraId = _cameraManager.getCameraIdList()[0];
+            } catch (CameraAccessException ex) {
+                Log.e("onResume", ex.getMessage());
+            }
         }
     }
 
@@ -296,11 +335,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return result;
     }
 
-    //region SurfaceHolder.Callback implementation (for flashlight on Android < 6)
+    //region SurfaceHolder.Callback implementation (for flashlight on Android versions less than 6)
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
     public void surfaceCreated(SurfaceHolder holder) {
-        if (_hasFlashlight) {
+        if (_hasFlashlight && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             _surfaceHolder = holder;
 
             try {
@@ -312,11 +351,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-        if (_hasFlashlight) {
+        if (_hasFlashlight && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             _camera.stopPreview();
+            _surfaceHolder = null;
         }
-
-        _surfaceHolder = null;
     }
     //endregion
 }
