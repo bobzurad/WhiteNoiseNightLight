@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">White Noise Night Light</string>
+    <string name="app_name">Night Light with White Noise</string>
     <string name="permdesc_write_settings">This allows the app to adjust the screen brightness.</string>
     <string name="permlab_flashlight">Flashlight</string>
     <string name="permdesc_flashlight">This allows the app the turn on/off the camera light.</string>

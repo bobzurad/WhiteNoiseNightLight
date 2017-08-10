@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         _soundPool = createSoundPool();
         _soundId = _soundPool.load(this, R.raw.whitenoise, 1);
         _soundPool.setLoop(_soundId, -1);
-        _bar.setTitle(fromHtml("<font color='#000000'>&nbsp;&nbsp;White Noise Night Light</font>"));
+        _bar.setTitle(fromHtml("<font color='#000000'>&nbsp;&nbsp;" + getString(R.string.app_name) + "</font>"));
         _bar.setDisplayShowHomeEnabled(true);
         _bar.setLogo(R.drawable.ic_action_bar_tab_light);
         _bar.setDisplayUseLogoEnabled(true);
@@ -148,13 +148,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 if (_bar != null) {
                     _bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#" + hex + hex + hex)));
                     if (progress < 80) {
-                        _bar.setTitle(fromHtml("<font color='#C0C0C0'>&nbsp;&nbsp;White Noise Night Light</font>"));
+                        _bar.setTitle(fromHtml("<font color='#C0C0C0'>&nbsp;&nbsp;" + getString(R.string.app_name) + "</font>"));
                         _brightnessTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _whiteNoiseTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _flashlightTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _bar.setLogo(R.drawable.ic_action_bar_tab_dark);
                     } else {
-                        _bar.setTitle(fromHtml("<font color='#000000'>&nbsp;&nbsp;White Noise Night Light</font>"));
+                        _bar.setTitle(fromHtml("<font color='#000000'>&nbsp;&nbsp;" + getString(R.string.app_name) + "</font>"));
                         _brightnessTextView.setTextColor(Color.BLACK);
                         _whiteNoiseTextView.setTextColor(Color.BLACK);
                         _flashlightTextView.setTextColor(Color.BLACK);
