@@ -102,7 +102,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 try {
                     _camera.setPreviewDisplay(_surfaceHolder);
                 } catch (java.io.IOException ex) {
-                    Log.e("onCreate", ex.getMessage());
+                    if (BuildConfig.DEBUG) {
+                        Log.e("onCreate", ex.getMessage());
+                    }
                 }
             }
         }
@@ -112,7 +114,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             _brightnessOnAppStart = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
             _brightnessModeOnAppStart = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
         } catch (Settings.SettingNotFoundException ex) {
-            Log.e("Error", ex.getMessage());
+            if (BuildConfig.DEBUG) {
+                Log.e("Error", ex.getMessage());
+            }
         }
 
         //check permissions to change screen brightness
@@ -218,13 +222,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                             try {
                                 _cameraManager.setTorchMode(_cameraId, true);   //Turn ON
                             } catch (CameraAccessException e) {
-                                Log.e("flashlight switch", e.getMessage());
+                                if (BuildConfig.DEBUG) {
+                                    Log.e("flashlight switch", e.getMessage());
+                                }
                             }
                         } else {
                             try {
                                 _cameraManager.setTorchMode(_cameraId, false);
                             } catch (CameraAccessException e) {
-                                Log.e("flashlight switch", e.getMessage());
+                                if (BuildConfig.DEBUG) {
+                                    Log.e("flashlight switch", e.getMessage());
+                                }
                             }
                         }
                     }
@@ -249,7 +257,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             try {
                 _cameraId = _cameraManager.getCameraIdList()[0];
             } catch (CameraAccessException ex) {
-                Log.e("onResume", ex.getMessage());
+                if (BuildConfig.DEBUG) {
+                    Log.e("onResume", ex.getMessage());
+                }
             }
         }
     }
@@ -301,8 +311,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             //set brightness
             Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
         } catch (Exception e) {
-            Log.e("Error", "Cannot access screen brightness");
-            e.printStackTrace();
+            if (BuildConfig.DEBUG) {
+                Log.e("Error", "Cannot access screen brightness");
+                e.printStackTrace();
+            }
         }
     }
 
@@ -352,7 +364,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             try {
                 _camera.setPreviewDisplay(_surfaceHolder);
             } catch (java.io.IOException ex) {
-                Log.e("surfaceCreated", ex.getMessage());
+                if (BuildConfig.DEBUG) {
+                    Log.e("surfaceCreated", ex.getMessage());
+                }
             }
         }
     }
