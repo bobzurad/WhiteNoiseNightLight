@@ -192,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                             && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                         //dialog that explains user must allow special permission
                         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                        alertDialog.setTitle("Alert");
-                        alertDialog.setMessage("Alert message to be shown");
+                        alertDialog.setTitle("Permission Requested");
+                        alertDialog.setMessage(getString(R.string.permission_alert_text));
                         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
