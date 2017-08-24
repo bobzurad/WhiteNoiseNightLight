@@ -3,6 +3,7 @@ package net.zurad.bob.whitenoisenightlight;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
@@ -37,10 +39,13 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
     LinearLayout _mainLayout;
+    LinearLayout _controlBrightnessLayout;
     LinearLayout _flashlightLayout;
     SeekBar _seekBar;
+    Switch _controlBrightnessSwitch;
     Switch _whiteNoiseSwitch;
     Switch _flashlightSwitch;
+    TextView _controlBrightnessTextView;
     TextView _brightnessTextView;
     TextView _whiteNoiseTextView;
     TextView _flashlightTextView;
@@ -74,11 +79,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         _bar = getSupportActionBar();
         _mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
+        _controlBrightnessLayout = (LinearLayout) findViewById(R.id.controlBrightnessLayout);
         _flashlightLayout = (LinearLayout) findViewById(R.id.flashlightLayout);
         _seekBar = (SeekBar) findViewById(R.id.seekBar);
+        _controlBrightnessSwitch = (Switch) findViewById(R.id.controllBrightnessSwitch);
         _whiteNoiseSwitch = (Switch) findViewById(R.id.whiteNoiseSwitch);
         _flashlightSwitch = (Switch) findViewById(R.id.flashlightSwitch);
         _brightnessTextView = (TextView) findViewById(R.id.brightnessTextView);
+        _controlBrightnessTextView = (TextView) findViewById(R.id.controlBrightnessTextView);
         _whiteNoiseTextView = (TextView) findViewById(R.id.whiteNoiseTextView);
         _flashlightTextView = (TextView) findViewById(R.id.flashlightTextView);
         _soundPool = createSoundPool();
@@ -126,17 +134,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             _canChangeScreenBrightness = ContextCompat
                     .checkSelfPermission(this, Manifest.permission.WRITE_SETTINGS) == PackageManager.PERMISSION_GRANTED;
         }
-
-        //request permissions
-        if (!_canChangeScreenBrightness) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                //permission for changing screen brightness
-                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
-            }
-        } else {
-            setBrightness(_seekBar.getProgress());
+        if (_canChangeScreenBrightness) {
+            _controlBrightnessSwitch.setChecked(true);
         }
 
         //logic to handle seekbar
@@ -154,12 +153,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     if (progress < 80) {
                         _bar.setTitle(fromHtml("<font color='#C0C0C0'>&nbsp;&nbsp;" + getString(R.string.app_name) + "</font>"));
                         _brightnessTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
+                        _controlBrightnessTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _whiteNoiseTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _flashlightTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorLight));
                         _bar.setLogo(R.drawable.ic_action_bar_tab_dark);
                     } else {
                         _bar.setTitle(fromHtml("<font color='#000000'>&nbsp;&nbsp;" + getString(R.string.app_name) + "</font>"));
                         _brightnessTextView.setTextColor(Color.BLACK);
+                        _controlBrightnessTextView.setTextColor(Color.BLACK);
                         _whiteNoiseTextView.setTextColor(Color.BLACK);
                         _flashlightTextView.setTextColor(Color.BLACK);
                         _bar.setLogo(R.drawable.ic_action_bar_tab_light);
@@ -179,6 +180,46 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        //logic for control screen brightness switch
+        _controlBrightnessSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isOn) {
+                if (isOn) {
+                    if (!_canChangeScreenBrightness
+                            && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        //dialog that explains user must allow special permission
+                        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Alert message to be shown");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        _controlBrightnessSwitch.setChecked(false);
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        //launch intent for permission to change screen brightness
+                                        Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                                        intent.setData(Uri.parse("package:" + getPackageName()));
+                                        startActivityForResult(intent, CODE_WRITE_SETTINGS_PERMISSION);
+                                    }
+                                });
+                        alertDialog.show();
+                    } else if (_canChangeScreenBrightness) {
+                        setBrightness(_seekBar.getProgress());
+                    }
+                } else if (_canChangeScreenBrightness) {
+                    //put brightness and mode values back to what they were when the app started
+                    Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, _brightnessOnAppStart);
+                    Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, _brightnessModeOnAppStart);
+                }
             }
         });
 
@@ -290,6 +331,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 && requestCode == CODE_WRITE_SETTINGS_PERMISSION && Settings.System.canWrite(this)) {
             _canChangeScreenBrightness = true;
             setBrightness(getResources().getInteger(R.integer.defaultBrightness));
+        } else {
+            _controlBrightnessSwitch.setChecked(false);
         }
     }
 
@@ -300,20 +343,22 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         else if (brightness > getResources().getInteger(R.integer.brightnessMax))
             brightness = getResources().getInteger(R.integer.brightnessMax);
 
-        try {
-            //make sure brightness is set to manual mode
-            int brightnessMode = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
+        if (_controlBrightnessSwitch.isChecked()) {
+            try {
+                //make sure brightness is set to manual mode
+                int brightnessMode = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
 
-            if (brightnessMode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
-                Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
-            }
+                if (brightnessMode == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) {
+                    Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+                }
 
-            //set brightness
-            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
-        } catch (Exception e) {
-            if (BuildConfig.DEBUG) {
-                Log.e("Error", "Cannot access screen brightness");
-                e.printStackTrace();
+                //set brightness
+                Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightness);
+            } catch (Exception e) {
+                if (BuildConfig.DEBUG) {
+                    Log.e("Error", "Cannot access screen brightness");
+                    e.printStackTrace();
+                }
             }
         }
     }
