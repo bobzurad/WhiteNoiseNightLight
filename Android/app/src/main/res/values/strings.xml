@@ -3,4 +3,5 @@
     <string name="permdesc_write_settings">This allows the app to adjust the screen brightness.</string>
     <string name="permlab_flashlight">Flashlight</string>
     <string name="permdesc_flashlight">This allows the app the turn on/off the camera light.</string>
+    <string name="permission_alert_text">You must give this app permission to control the screen brightness. To do so, follow these steps:\n\n1) Press OK\n\n2) When the permission setting appears, enable \"Allow modify system settings\"\n\n3) Press the Back button on your device to return to this app.\n\nScreen brightness is the only setting this app changes. You can review this app\'s source code at:\n\nhttps://github.com/bobzurad/WhiteNoiseNightLight</string>
 </resources>
