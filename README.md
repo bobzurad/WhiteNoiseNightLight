@@ -37,7 +37,7 @@ This will put a file named `app-release-unsigned.apk` in `Android/app/build/outp
 Note: `zipalign` and `apksigner` will be in `$ANDROID_HOME/build-tools/<version>`
 ```
 zipalign -v -p 4 app-release-unsigned.apk app-release-unsigned-aligned.apk
-apksigner sign --ks <path_to_your_private_key>.jks --out app-release.apk app-release-unsigned-aligned.apk
+apksigner sign --ks <path_to_your_private_key>.jks --out app-release.apk app-release-unsigned-aligned.apk   (password is in uploadkey-password.txt in Dropbox)
 apksigner verify app-release.apk
 ```
 
