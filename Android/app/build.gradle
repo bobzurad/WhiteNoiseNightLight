@@ -6,9 +6,9 @@ android {
     defaultConfig {
         applicationId "net.zurad.bob.whitenoisenightlight"
         minSdkVersion 19
-        targetSdkVersion 35
-        versionCode 9
-        versionName "1.1.0"
+        targetSdkVersion 36
+        versionCode 10
+        versionName "1.1.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
